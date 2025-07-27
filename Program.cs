@@ -2,29 +2,47 @@ using Microsoft.EntityFrameworkCore;
 using GetQuestions.Services;
 using GetQuestions.Models;
 using GetQuestions.Data;
+using Microsoft.OpenApi.Models;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Datenbank-Verbindung einrichten
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<QuizDbContext>(options =>
+    options.UseMySQL(connectionString));
 
 builder.Services.AddControllers();
+
 builder.Services.AddScoped<GetQuestionServices>();
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "IT-Quiz-Backend",
+        Version = "v1",
+        Description = "Backend of the IT-Quiz",
+        Contact = new OpenApiContact
+        {
+            Name = "Saruman566",
+            Email = "email@example.com"
+        }
+    });
+
+});
 
 var app = builder.Build();
 
-// Swagger
 
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "IT-Quiz-Backend V1");
 });
 
-
-// app.UseHttpsRedirection(); // optional deaktivieren
 
 app.UseAuthorization();
 

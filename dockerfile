@@ -6,4 +6,4 @@ COPY ./publish ./
 ENV ASPNETCORE_URLS=http://0.0.0.0:5154
 EXPOSE 5154
 
-ENTRYPOINT ["dotnet", "Backendtest1.dll"]
+ENTRYPOINT ["dotnet", "IT-Quiz-Backend.dll"]

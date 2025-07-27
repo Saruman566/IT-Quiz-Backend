@@ -2,63 +2,85 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GetQuestions.Data;
 using GetQuestions.Models;
+using GetQuestions.Services;
+using System.Text.Json;
+
 
 namespace GetQuestions.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class QuestController : ControllerBase
+public class QuizController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly HashSet<string> _validTables = new()
+    private readonly GetQuestionServices _questionServices;
+
+    private readonly HashSet<string> _validGebiete = new(StringComparer.OrdinalIgnoreCase)
     {
         "arbeitsrecht", "cyberphysischesysteme", "datenbanken", "firewall", "ipv4", "ipv6",
         "it_sicherheit", "it_systeme", "kalkulationen", "linux", "marketing", "organisationslehre",
         "programmieren", "projektmanagement", "rechtsformen", "routing", "tcpip", "wiso"
     };
 
-    public QuestController(AppDbContext context)
+    public QuizController(GetQuestionServices questionServices)
     {
-        _context = context;
+        _questionServices = questionServices;
     }
 
     [HttpGet]
     public IActionResult GetByGebiet([FromQuery] string gebiet)
-{
-    if (!_validTables.Contains(gebiet.ToLower()))
-        return BadRequest("Ungültiges Gebiet.");
-
-    var sql = $@"
-        SELECT FRAGE, ANTWORT_EINS, ANTWORT_ZWEI, ANTWORT_DREI, ANTWORT_VIER, RICHTIGE_ANTWORT 
-        FROM `{gebiet}`";
-
-    var quests = _context.Set<Quest>()
-        .FromSqlRaw(sql)
-        .ToList();
-
-    return Ok(quests);
-}
-
-    [HttpPost]
-    public IActionResult AddQuest([FromQuery] string gebiet, [FromBody] Quest quest)
     {
-        if (!_validTables.Contains(gebiet.ToLower()))
+        if (string.IsNullOrWhiteSpace(gebiet) || !_validGebiete.Contains(gebiet))
             return BadRequest("Ungültiges Gebiet.");
 
-        var sql = @$"
-            INSERT INTO `{gebiet}` 
-            (FRAGE, ANTWORT_EINS, ANTWORT_ZWEI, ANTWORT_DREI, ANTWORT_VIER, RICHTIGE_ANTWORT) 
-            VALUES (@frage, @a1, @a2, @a3, @a4, @correct)";
+        var questions = _questionServices.GetAll(gebiet);
+        return Ok(questions);
+    }
 
-        _context.Database.ExecuteSqlRaw(sql,
-            new MySql.Data.MySqlClient.MySqlParameter("@frage", quest.FRAGE ?? ""),
-            new MySql.Data.MySqlClient.MySqlParameter("@a1", quest.ANTWORT_EINS ?? ""),
-            new MySql.Data.MySqlClient.MySqlParameter("@a2", quest.ANTWORT_ZWEI ?? ""),
-            new MySql.Data.MySqlClient.MySqlParameter("@a3", quest.ANTWORT_DREI ?? ""),
-            new MySql.Data.MySqlClient.MySqlParameter("@a4", quest.ANTWORT_VIER ?? ""),
-            new MySql.Data.MySqlClient.MySqlParameter("@correct", quest.RICHTIGE_ANTWORT ?? "")
-        );
+    [HttpPost]
+    public async Task<IActionResult> AddQuestion([FromQuery] string gebiet, [FromBody] JsonElement newQuestionJson)
+    {
+        if (string.IsNullOrWhiteSpace(gebiet) || !_validGebiete.Contains(gebiet))
+            return BadRequest("Ungültiges Gebiet.");
 
-        return Ok(quest);
+        try
+        {      
+            var type = gebiet.ToLower() switch
+            {
+                "arbeitsrecht" => typeof(Arbeitsrecht),
+                "cyberphysischesysteme" => typeof(Cyberphysischesysteme),
+                "datenbanken" => typeof(Datenbanken),
+                "firewall" => typeof(Firewall),
+                "ipv4" => typeof(Ipv4),
+                "ipv6" => typeof(Ipv6),
+                "it_sicherheit" => typeof(ItSicherheit),
+                "it_systeme" => typeof(ItSysteme),
+                "kalkulationen" => typeof(Kalkulationen),
+                "linux" => typeof(Linux),
+                "marketing" => typeof(Marketing),
+                "organisationslehre" => typeof(Organisationslehre),
+                "programmieren" => typeof(Programmieren),
+                "projektmanagement" => typeof(Projektmanagement),
+                "rechtsformen" => typeof(Rechtsformen),
+                "routing" => typeof(Routing),
+                "tcpip" => typeof(Tcpip),
+                "wiso" => typeof(Wiso),
+                _ => null
+            };
+
+            if (type == null)
+                return BadRequest("Ungültiges Gebiet.");
+
+            var newQuestion = (QuestionBase)JsonSerializer.Deserialize(newQuestionJson.GetRawText(), type)!;
+
+            await _questionServices.AddQuestion(gebiet, newQuestion);
+
+            return Ok(newQuestion);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Fehler beim Hinzufügen der Frage: {ex.Message}");
+        }
     }
 }
+
+
