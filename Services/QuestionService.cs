@@ -6,17 +6,17 @@ using MySql.Data.MySqlClient;
 namespace GetQuestions.Services
 {
     public class GetQuestionServices
-{
-    private readonly QuizDbContext _context;
-
-    private readonly Dictionary<string, Func<IEnumerable<QuestionBase>>> _getters;
-    private readonly Dictionary<string, Func<QuestionBase, Task>> _adders;
-
-    public GetQuestionServices(QuizDbContext context)
     {
-        _context = context;
+        private readonly QuizDbContext _context;
 
-        _getters = new Dictionary<string, Func<IEnumerable<QuestionBase>>>(StringComparer.OrdinalIgnoreCase)
+        private readonly Dictionary<string, Func<IEnumerable<QuestionBase>>> _getters;
+        private readonly Dictionary<string, Func<QuestionBase, Task>> _adders;
+
+        public GetQuestionServices(QuizDbContext context)
+        {
+            _context = context;
+
+            _getters = new Dictionary<string, Func<IEnumerable<QuestionBase>>>(StringComparer.OrdinalIgnoreCase)
         {
             { "arbeitsrecht", () => _context.Arbeitsrecht },
             { "cyberphysischesysteme", () => _context.Cyberphysischesysteme },
@@ -38,8 +38,7 @@ namespace GetQuestions.Services
             { "wiso", () => _context.Wiso }
         };
 
-        // Map für AddQuestion: füge die Frage dem passenden DbSet hinzu
-        _adders = new Dictionary<string, Func<QuestionBase, Task>>(StringComparer.OrdinalIgnoreCase)
+            _adders = new Dictionary<string, Func<QuestionBase, Task>>(StringComparer.OrdinalIgnoreCase)
         {
             { "arbeitsrecht", q => AddQuestionAsync(_context.Arbeitsrecht, (Arbeitsrecht)q) },
             { "cyberphysischesysteme", q => AddQuestionAsync(_context.Cyberphysischesysteme, (Cyberphysischesysteme)q) },
@@ -60,29 +59,32 @@ namespace GetQuestions.Services
             { "tcpip", q => AddQuestionAsync(_context.Tcpip, (Tcpip)q) },
             { "wiso", q => AddQuestionAsync(_context.Wiso, (Wiso)q) }
         };
-    }
+        }
 
-    public IEnumerable<QuestionBase> GetAll(string gebiet)
-    {
-        if (!_getters.ContainsKey(gebiet))
-            throw new ArgumentException("Ungültiger Tabellenname.");
+        public IEnumerable<QuestionBase> GetAll(string gebiet)
+        {
+            if (!_getters.ContainsKey(gebiet))
+                throw new ArgumentException("Ungültiger Tabellenname.");
 
-        return _getters[gebiet]().ToList();
-    }
+            return _getters[gebiet]().ToList();
+        }
 
-    public async Task AddQuestion(string gebiet, QuestionBase newQuestion)
-    {
-        if (!_adders.ContainsKey(gebiet))
-            throw new ArgumentException("Ungültiger Tabellenname.");
+        public async Task AddQuestion(string gebiet, QuestionBase newQuestion)
+        {
+            if (!_adders.ContainsKey(gebiet))
+                throw new ArgumentException("Ungültiger Tabellenname.");
 
-        await _adders[gebiet](newQuestion);
-        await _context.SaveChangesAsync();
-    }
+            await _adders[gebiet](newQuestion);
+            await _context.SaveChangesAsync();
+        }
 
-    private async Task AddQuestionAsync<TEntity>(DbSet<TEntity> dbSet, TEntity entity) where TEntity : QuestionBase
-    {
-        await dbSet.AddAsync(entity);
-    }
+        private async Task AddQuestionAsync<TEntity>(DbSet<TEntity> dbSet, TEntity entity) where TEntity : QuestionBase
+        {
+            await dbSet.AddAsync(entity);
+        }
+    
+    
+    
 }
 
 
