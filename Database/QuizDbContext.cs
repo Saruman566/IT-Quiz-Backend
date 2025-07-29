@@ -29,26 +29,26 @@ namespace GetQuestions.Data
     {
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Arbeitsrecht>().ToTable("arbeitsrecht").HasNoKey();
-        modelBuilder.Entity<Cyberphysischesysteme>().ToTable("cyberphysischesysteme").HasNoKey();
-        modelBuilder.Entity<Datenbanken>().ToTable("datenbanken").HasNoKey();
-        modelBuilder.Entity<Firewall>().ToTable("firewall").HasNoKey();
-        modelBuilder.Entity<Ipv4>().ToTable("ipv4").HasNoKey();
-        modelBuilder.Entity<Ipv6>().ToTable("ipv6").HasNoKey();
-        modelBuilder.Entity<ItSicherheit>().ToTable("it_sicherheit").HasNoKey();
-        modelBuilder.Entity<ItSysteme>().ToTable("it_systeme").HasNoKey();
-        modelBuilder.Entity<Kalkulationen>().ToTable("kalkulationen").HasNoKey();
-        modelBuilder.Entity<Linux>().ToTable("linux").HasNoKey();
-        modelBuilder.Entity<Marketing>().ToTable("marketing").HasNoKey();
-        modelBuilder.Entity<Organisationslehre>().ToTable("organisationslehre").HasNoKey();
-        modelBuilder.Entity<Programmieren>().ToTable("programmieren").HasNoKey();
-        modelBuilder.Entity<Projektmanagement>().ToTable("projektmanagement").HasNoKey();
-        modelBuilder.Entity<Rechtsformen>().ToTable("rechtsformen").HasNoKey();
-        modelBuilder.Entity<Routing>().ToTable("routing").HasNoKey();
-        modelBuilder.Entity<Tcpip>().ToTable("tcpip").HasNoKey();
-        modelBuilder.Entity<Wiso>().ToTable("wiso").HasNoKey();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Arbeitsrecht>().ToTable("arbeitsrecht");           
+            modelBuilder.Entity<Cyberphysischesysteme>().ToTable("cyberphysischesysteme");     
+            modelBuilder.Entity<Datenbanken>().ToTable("datenbanken");
+            modelBuilder.Entity<Firewall>().ToTable("firewall");
+            modelBuilder.Entity<Ipv4>().ToTable("ipv4");
+            modelBuilder.Entity<Ipv6>().ToTable("ipv6");
+            modelBuilder.Entity<ItSicherheit>().ToTable("it_sicherheit");
+            modelBuilder.Entity<ItSysteme>().ToTable("it_systeme");
+            modelBuilder.Entity<Kalkulationen>().ToTable("kalkulationen");
+            modelBuilder.Entity<Linux>().ToTable("linux");
+            modelBuilder.Entity<Marketing>().ToTable("marketing");
+            modelBuilder.Entity<Organisationslehre>().ToTable("organisationslehre");
+            modelBuilder.Entity<Programmieren>().ToTable("programmieren");
+            modelBuilder.Entity<Projektmanagement>().ToTable("projektmanagement");
+            modelBuilder.Entity<Rechtsformen>().ToTable("rechtsformen");
+            modelBuilder.Entity<Routing>().ToTable("routing");
+            modelBuilder.Entity<Tcpip>().ToTable("tcpip");
+            modelBuilder.Entity<Wiso>().ToTable("wiso");
     }
 }
 

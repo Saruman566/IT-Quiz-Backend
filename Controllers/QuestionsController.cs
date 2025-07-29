@@ -14,6 +14,42 @@ public class QuizController : ControllerBase
 {
     private readonly GetQuestionServices _questionServices;
 
+    public static QuestionBase MapToModel(string gebiet, QuestionDto dto)
+{
+    QuestionBase question = gebiet.ToLower() switch
+    {
+        "arbeitsrecht" => new Arbeitsrecht(),
+        "linux" => new Linux(),
+        "projektmanagement" => new Projektmanagement(),
+        "cyberphysischesysteme" => new Cyberphysischesysteme(),
+        "datenbanken" => new Datenbanken(),
+        "firewall" => new Firewall(),
+        "ipv4" => new Ipv4(),
+        "ipv6" => new Ipv6(),
+        "it_sicherheit" => new ItSicherheit(),
+        "it_systeme" => new ItSysteme(),
+        "kalkulationen" => new Kalkulationen(),
+        "marketing" => new Marketing(),
+        "organisationslehre" => new Organisationslehre(),
+        "programmieren" => new Programmieren(),
+        "rechtsformen" => new Rechtsformen(),
+        "routing" => new Routing(),
+        "tcpip" => new Tcpip(),
+        "wiso" => new Wiso(),
+        _ => throw new NotSupportedException("Unbekanntes Gebiet")
+    };
+
+    question.FRAGE = dto.Frage;
+    question.ANTWORT_EINS = dto.Antwort_Eins;
+    question.ANTWORT_ZWEI = dto.Antwort_Zwei;
+    question.ANTWORT_DREI = dto.Antwort_Drei;
+    question.ANTWORT_VIER = dto.Antwort_Vier;
+    question.RICHTIGE_ANTWORT = dto.Richtige_Antwort;
+
+    return question;
+
+}
+
     private readonly HashSet<string> _validGebiete = new(StringComparer.OrdinalIgnoreCase)
     {
         "arbeitsrecht", "cyberphysischesysteme", "datenbanken", "firewall", "ipv4", "ipv6",
@@ -37,50 +73,30 @@ public class QuizController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddQuestion([FromQuery] string gebiet, [FromBody] JsonElement newQuestionJson)
+public async Task<IActionResult> AddQuestions([FromQuery] string gebiet, [FromBody] List<QuestionDto> questions)
+{
+    if (string.IsNullOrWhiteSpace(gebiet) || !_validGebiete.Contains(gebiet))
+        return BadRequest("Ungültiges Gebiet.");
+
+    var added = new List<QuestionBase>();
+
+    foreach (var dto in questions)
     {
-        if (string.IsNullOrWhiteSpace(gebiet) || !_validGebiete.Contains(gebiet))
-            return BadRequest("Ungültiges Gebiet.");
-
         try
-        {      
-            var type = gebiet.ToLower() switch
-            {
-                "arbeitsrecht" => typeof(Arbeitsrecht),
-                "cyberphysischesysteme" => typeof(Cyberphysischesysteme),
-                "datenbanken" => typeof(Datenbanken),
-                "firewall" => typeof(Firewall),
-                "ipv4" => typeof(Ipv4),
-                "ipv6" => typeof(Ipv6),
-                "it_sicherheit" => typeof(ItSicherheit),
-                "it_systeme" => typeof(ItSysteme),
-                "kalkulationen" => typeof(Kalkulationen),
-                "linux" => typeof(Linux),
-                "marketing" => typeof(Marketing),
-                "organisationslehre" => typeof(Organisationslehre),
-                "programmieren" => typeof(Programmieren),
-                "projektmanagement" => typeof(Projektmanagement),
-                "rechtsformen" => typeof(Rechtsformen),
-                "routing" => typeof(Routing),
-                "tcpip" => typeof(Tcpip),
-                "wiso" => typeof(Wiso),
-                _ => null
-            };
-
-            if (type == null)
-                return BadRequest("Ungültiges Gebiet.");
-
-            var newQuestion = (QuestionBase)JsonSerializer.Deserialize(newQuestionJson.GetRawText(), type)!;
-
-            await _questionServices.AddQuestion(gebiet, newQuestion);
-
-            return Ok(newQuestion);
+        {
+            var question = MapToModel(gebiet, dto);
+            await _questionServices.AddQuestion(gebiet, question);
+            added.Add(question);
         }
         catch (Exception ex)
         {
-            return BadRequest($"Fehler beim Hinzufügen der Frage: {ex.Message}");
+            return BadRequest($"Fehler bei einer Frage: {ex.Message}");
         }
     }
+
+    return Ok(added);
+}
+
 }
 
 
