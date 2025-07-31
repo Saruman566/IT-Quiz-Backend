@@ -56,7 +56,7 @@ public class Datenbanken : QuestionBase
 public class Firewall : QuestionBase
 {
     [Key]
-    [Column("FID")]
+    [Column("FWID")]
     public int FID { get; set; }
  }
 public class Ipv4 : QuestionBase

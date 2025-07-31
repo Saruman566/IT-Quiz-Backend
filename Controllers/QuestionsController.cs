@@ -9,7 +9,7 @@ using System.Text.Json;
 namespace GetQuestions.Controller;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class QuizController : ControllerBase
 {
     private readonly GetQuestionServices _questionServices;
