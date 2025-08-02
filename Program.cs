@@ -19,10 +19,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:3002", "http://localhost:5073", "http://itquizfrontend")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins(
+           "http://localhost:3002",    
+           "http://localhost:5073",   
+           "http://itquizfrontend",    
+           "http://itquizbackend"  
+       )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
