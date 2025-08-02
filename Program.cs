@@ -7,34 +7,27 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔌 Datenbank
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<QuizDbContext>(options =>
     options.UseMySQL(connectionString));
 
-// 🌍 CORS
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-           "http://localhost:3002",    
-           "http://localhost:5073",   
-           "http://itquizfrontend",    
-           "http://itquizbackend"  
-       )
-        .AllowAnyHeader()
-        .AllowAnyMethod();
+        policy.WithOrigins("http://localhost:3002", "http://localhost:5073")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
-// 📦 Dienste
+
 builder.Services.AddControllers();
 builder.Services.AddScoped<GetQuestionServices>();
 
-// 📄 Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
